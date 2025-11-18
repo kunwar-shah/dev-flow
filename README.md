@@ -130,7 +130,6 @@ devflow site open myapp.test
 
 Since this is experimental, documentation is minimal:
 
-- **[.claude.md](.claude.md)** - Project context and development guidelines (internal)
 - **[config/](config/)** - Default configuration templates
 - **[lib/core/](lib/core/)** - Core library source code
 
