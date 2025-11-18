@@ -7,6 +7,9 @@
 # Internal docs and chat logs
 docs/
 
+# Claude AI context file (internal only)
+.claude.md
+
 ###############################################################################
 # User Configuration and Runtime Data
 ###############################################################################
