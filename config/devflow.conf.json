@@ -1,0 +1,109 @@
+{
+  "version": "1.0",
+  "description": "Default DevFlow configuration template",
+  "settings": {
+    "websites_root": "$HOME/websites",
+    "default_php": "8.2",
+    "default_docroot": "public",
+    "auto_ssl": false,
+    "auto_hosts": false,
+    "auto_db": false,
+    "editor": "code"
+  },
+  "services": {
+    "apache": {
+      "enabled": true,
+      "auto_start": true,
+      "port": 80,
+      "ssl_port": 443,
+      "config_dir": "/etc/apache2",
+      "sites_available": "/etc/apache2/sites-available",
+      "sites_enabled": "/etc/apache2/sites-enabled"
+    },
+    "mysql": {
+      "enabled": true,
+      "auto_start": true,
+      "port": 3306,
+      "host": "127.0.0.1",
+      "root_user": "root"
+    },
+    "redis": {
+      "enabled": false,
+      "auto_start": false,
+      "port": 6379
+    }
+  },
+  "php": {
+    "supported_versions": ["7.4", "8.0", "8.1", "8.2", "8.3"],
+    "default_version": "8.2",
+    "fpm_socket_path": "/run/php/php{VERSION}-fpm.sock",
+    "conf_dir": "/etc/php/{VERSION}/fpm"
+  },
+  "ssl": {
+    "ca_dir": "$DEVFLOW_CONFIG_DIR/ssl/ca",
+    "certs_dir": "$DEVFLOW_CONFIG_DIR/ssl/certs",
+    "default_country": "US",
+    "default_state": "State",
+    "default_city": "City",
+    "default_org": "DevFlow Local",
+    "key_size": 2048,
+    "days_valid": 825
+  },
+  "database": {
+    "default_charset": "utf8mb4",
+    "default_collation": "utf8mb4_unicode_ci",
+    "credentials_file": "$DEVFLOW_CONFIG_DIR/db-credentials.json"
+  },
+  "backup": {
+    "enabled": true,
+    "location": "$DEVFLOW_CONFIG_DIR/backup",
+    "retention_days": 30,
+    "compress": true,
+    "auto_backup": false,
+    "exclude_patterns": [
+      "node_modules",
+      "vendor",
+      ".git",
+      "storage/logs",
+      "*.log"
+    ]
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "$DEVFLOW_CONFIG_DIR/logs/devflow.log",
+    "max_size_mb": 100,
+    "rotate": true,
+    "format": "json",
+    "console_format": "pretty"
+  },
+  "display": {
+    "color": true,
+    "emoji": true,
+    "verbose": false,
+    "quiet": false,
+    "progress_bar": true
+  },
+  "migration": {
+    "exclude_patterns": [
+      "node_modules/",
+      "vendor/",
+      ".git/",
+      "storage/logs/",
+      "*.log",
+      ".env"
+    ],
+    "preserve_permissions": true,
+    "use_rsync": true
+  },
+  "templates": {
+    "vhost": "$DEVFLOW_LIB_DIR/templates/vhost.conf.template",
+    "vhost_ssl": "$DEVFLOW_LIB_DIR/templates/vhost-ssl.conf.template",
+    "php_fpm_pool": "$DEVFLOW_LIB_DIR/templates/php-fpm-pool.conf"
+  },
+  "paths": {
+    "lib_dir": "$DEVFLOW_LIB_DIR",
+    "share_dir": "$DEVFLOW_LIB_DIR/../share",
+    "config_dir": "$DEVFLOW_CONFIG_DIR",
+    "temp_dir": "$DEVFLOW_CONFIG_DIR/tmp"
+  }
+}
