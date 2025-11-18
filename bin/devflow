@@ -1,0 +1,266 @@
+#!/usr/bin/env bash
+
+#######################################
+# DevFlow - Laragon-style Development Environment for WSL/Linux
+# Main CLI entry point
+#
+# Usage:
+#   devflow <command> <subcommand> [options] [arguments]
+#
+# Version: 0.1.0-dev
+# License: MIT
+#######################################
+
+set -euo pipefail
+
+# Version
+DEVFLOW_VERSION="0.1.0-dev"
+
+# Determine installation directory
+if [ -n "${DEVFLOW_LIB_DIR:-}" ]; then
+    LIB_DIR="$DEVFLOW_LIB_DIR"
+elif [ -d "$(dirname "$0")/../lib" ]; then
+    # Development mode - relative to bin/devflow
+    LIB_DIR="$(cd "$(dirname "$0")/../lib" && pwd)"
+elif [ -d "/opt/devflow/lib" ]; then
+    # System installation
+    LIB_DIR="/opt/devflow/lib"
+else
+    echo "Error: Cannot find DevFlow library directory" >&2
+    exit 1
+fi
+
+# Export for child scripts
+export DEVFLOW_LIB_DIR="$LIB_DIR"
+export DEVFLOW_VERSION
+
+# Load core libraries
+# shellcheck source=lib/core/utils.sh
+source "$LIB_DIR/core/utils.sh"
+# shellcheck source=lib/core/logger.sh
+source "$LIB_DIR/core/logger.sh"
+# shellcheck source=lib/core/config.sh
+source "$LIB_DIR/core/config.sh"
+# shellcheck source=lib/core/validator.sh
+source "$LIB_DIR/core/validator.sh"
+
+#######################################
+# Display version information
+# Globals:
+#   DEVFLOW_VERSION
+# Outputs:
+#   Version string to stdout
+#######################################
+show_version() {
+    echo "DevFlow version $DEVFLOW_VERSION"
+}
+
+#######################################
+# Display help information
+# Outputs:
+#   Help text to stdout
+#######################################
+show_help() {
+    cat << 'EOF'
+DevFlow - Laragon-style Development Environment for WSL/Linux
+
+Usage:
+  devflow <command> <subcommand> [options] [arguments]
+
+Commands:
+  site        Manage development sites
+  php         Manage PHP versions
+  ssl         Manage SSL certificates
+  db          Manage databases
+  service     Manage system services
+  migrate     Migrate projects from Windows to WSL
+  logs        View and monitor logs
+  backup      Backup and restore sites
+  hosts       Manage Windows hosts file
+  doctor      System health check
+  update      Update DevFlow to latest version
+
+Global Options:
+  --help, -h     Show help information
+  --version, -v  Show version information
+  --verbose      Enable verbose output
+  --quiet        Suppress non-error output
+  --debug        Enable debug mode
+
+Examples:
+  devflow site create myapp.test php8.2
+  devflow php install 8.3
+  devflow ssl create myapp.test
+  devflow db create myapp_db
+
+Run 'devflow <command> --help' for command-specific help.
+
+Documentation: https://devflow.dev/docs
+Report issues: https://github.com/devflow/devflow/issues
+EOF
+}
+
+#######################################
+# Parse global options
+# Arguments:
+#   All command-line arguments
+# Returns:
+#   0 on success, 1 on error
+#######################################
+parse_global_options() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --help|-h)
+                show_help
+                exit 0
+                ;;
+            --version|-v)
+                show_version
+                exit 0
+                ;;
+            --verbose)
+                export DEVFLOW_VERBOSE=1
+                shift
+                ;;
+            --quiet)
+                export DEVFLOW_QUIET=1
+                shift
+                ;;
+            --debug)
+                export DEVFLOW_DEBUG=1
+                set -x
+                shift
+                ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                log_error "Unknown option: $1"
+                echo "Run 'devflow --help' for usage information."
+                return 1
+                ;;
+            *)
+                # Not a global option, break to process command
+                break
+                ;;
+        esac
+    done
+
+    # Store remaining arguments
+    DEVFLOW_ARGS=("$@")
+}
+
+#######################################
+# Route command to appropriate handler
+# Arguments:
+#   Command name and arguments
+# Returns:
+#   Command exit code
+#######################################
+route_command() {
+    local command="${1:-}"
+
+    if [ -z "$command" ]; then
+        show_help
+        return 0
+    fi
+
+    shift || true
+
+    case "$command" in
+        site)
+            # shellcheck source=lib/commands/site.sh
+            source "$LIB_DIR/commands/site.sh"
+            site_command "$@"
+            ;;
+        php)
+            # shellcheck source=lib/commands/php.sh
+            source "$LIB_DIR/commands/php.sh"
+            php_command "$@"
+            ;;
+        ssl)
+            # shellcheck source=lib/commands/ssl.sh
+            source "$LIB_DIR/commands/ssl.sh"
+            ssl_command "$@"
+            ;;
+        db)
+            # shellcheck source=lib/commands/db.sh"
+            source "$LIB_DIR/commands/db.sh"
+            db_command "$@"
+            ;;
+        service)
+            # shellcheck source=lib/commands/service.sh
+            source "$LIB_DIR/commands/service.sh"
+            service_command "$@"
+            ;;
+        migrate)
+            # shellcheck source=lib/commands/migrate.sh
+            source "$LIB_DIR/commands/migrate.sh"
+            migrate_command "$@"
+            ;;
+        logs)
+            # shellcheck source=lib/commands/logs.sh
+            source "$LIB_DIR/commands/logs.sh"
+            logs_command "$@"
+            ;;
+        backup)
+            # shellcheck source=lib/commands/backup.sh
+            source "$LIB_DIR/commands/backup.sh"
+            backup_command "$@"
+            ;;
+        hosts)
+            # shellcheck source=lib/commands/hosts.sh
+            source "$LIB_DIR/commands/hosts.sh"
+            hosts_command "$@"
+            ;;
+        doctor)
+            # shellcheck source=lib/commands/doctor.sh
+            source "$LIB_DIR/commands/doctor.sh"
+            doctor_command "$@"
+            ;;
+        update)
+            # shellcheck source=lib/commands/update.sh
+            source "$LIB_DIR/commands/update.sh"
+            update_command "$@"
+            ;;
+        help)
+            show_help
+            return 0
+            ;;
+        *)
+            log_error "Unknown command: $command"
+            echo ""
+            echo "Run 'devflow --help' for available commands."
+            return 1
+            ;;
+    esac
+}
+
+#######################################
+# Main entry point
+# Arguments:
+#   All command-line arguments
+# Returns:
+#   Exit code from routed command
+#######################################
+main() {
+    # Parse global options
+    parse_global_options "$@"
+
+    # Remaining arguments after global options
+    set -- "${DEVFLOW_ARGS[@]}"
+
+    # Initialize (load config if available)
+    config_init || {
+        log_warn "Could not load configuration, using defaults"
+    }
+
+    # Route to command handler
+    route_command "$@"
+}
+
+# Run main if executed directly (not sourced)
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+    main "$@"
+fi

@@ -1,0 +1,139 @@
+# DevFlow Git Ignore Rules
+
+###############################################################################
+# User Configuration and Runtime Data
+###############################################################################
+
+# User configuration directory (contains sensitive data)
+.devflow/
+
+# Database credentials
+db-credentials.json
+**/db-credentials.json
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+tmp/
+
+# Log files
+*.log
+logs/
+**/*.log
+
+# Backup files
+*.backup
+*.bak
+backup/
+
+###############################################################################
+# Environment and Secrets
+###############################################################################
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# SSH keys and certificates
+*.key
+*.pem
+*.crt
+*.csr
+id_rsa
+id_rsa.pub
+
+# Credentials
+credentials.json
+secrets.json
+
+###############################################################################
+# Development Tools
+###############################################################################
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# shellcheck cache
+.shellcheckrc
+
+###############################################################################
+# Dependencies and Build Artifacts
+###############################################################################
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# PHP Composer
+vendor/
+composer.lock
+composer.phar
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+ENV/
+
+###############################################################################
+# Website Data (if websites folder is in repo)
+###############################################################################
+
+# Ignore actual website files if accidentally placed in repo
+websites/
+sites/
+
+###############################################################################
+# Testing
+###############################################################################
+
+# Test artifacts
+test-results/
+coverage/
+.bats-*/
+
+###############################################################################
+# OS Files
+###############################################################################
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+.Trash-*
+
+###############################################################################
+# Misc
+###############################################################################
+
+# Archives
+*.tar
+*.tar.gz
+*.zip
+*.rar
+
+# Large files
+*.iso
+*.dmg
