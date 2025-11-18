@@ -1,0 +1,30 @@
+<VirtualHost *:443>
+    ServerName {{SITE_NAME}}
+    ServerAlias www.{{SITE_NAME}}
+
+    DocumentRoot {{DOCUMENT_ROOT}}
+
+    <Directory {{DOCUMENT_ROOT}}>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    # PHP-FPM Configuration
+    <FilesMatch \.php$>
+        SetHandler "proxy:unix:{{PHP_FPM_SOCKET}}|fcgi://localhost"
+    </FilesMatch>
+
+    # SSL Configuration
+    SSLEngine on
+    SSLCertificateFile {{SSL_CERT_PATH}}
+    SSLCertificateKeyFile {{SSL_KEY_PATH}}
+
+    # Logging
+    ErrorLog ${APACHE_LOG_DIR}/{{SITE_NAME}}-ssl-error.log
+    CustomLog ${APACHE_LOG_DIR}/{{SITE_NAME}}-ssl-access.log combined
+
+    # Environment
+    SetEnv APP_ENV local
+    SetEnv HTTPS on
+</VirtualHost>
