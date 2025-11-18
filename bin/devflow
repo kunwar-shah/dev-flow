@@ -62,41 +62,118 @@ show_version() {
 #######################################
 show_help() {
     cat << 'EOF'
-DevFlow - Laragon-style Development Environment for WSL/Linux
+╔══════════════════════════════════════════════════════════════╗
+║        DevFlow - Development Environment for WSL/Linux       ║
+║              Laragon-style LAMP Stack Manager                ║
+╚══════════════════════════════════════════════════════════════╝
 
 Usage:
   devflow <command> <subcommand> [options] [arguments]
 
-Commands:
+CORE COMMANDS:
   site        Manage development sites
-  php         Manage PHP versions
+    create      Create new site with Apache vhost
+    list        List all sites
+    delete      Delete site and files
+    info        Show site details
+    open        Open site in browser
+
+  php         Manage PHP versions (7.4, 8.0, 8.1, 8.2, 8.3)
+    install     Install PHP version with extensions
+    list        Show installed/available versions
+    uninstall   Remove PHP version
+    switch      Change default PHP version
+    info        Show PHP version details
+
+  db          Manage MySQL/MariaDB databases
+    create      Create database with optional user
+    list        List all databases
+    delete      Delete database
+    import      Import SQL file
+    export      Export database to SQL file
+
   ssl         Manage SSL certificates
-  db          Manage databases
+    install-ca  Create self-signed Root CA
+    create      Generate SSL certificate for site
+    list        List all certificates
+    delete      Remove certificate
+    trust       Install Root CA in system
+
+UTILITY COMMANDS:
   service     Manage system services
-  migrate     Migrate projects from Windows to WSL
+    status      Show service status
+    start       Start service(s)
+    stop        Stop service(s)
+    restart     Restart service(s)
+    logs        View service logs
+
   logs        View and monitor logs
-  backup      Backup and restore sites
-  hosts       Manage Windows hosts file
-  doctor      System health check
+    site        View site logs (access/error)
+    tail        Follow logs in real-time
+    clear       Clear site logs
+    list        List all log files
+
+  backup      Backup and restore
+    site        Backup site files
+    db          Backup database
+    all         Backup site + database
+    restore     Restore from backup
+    list        List all backups
+
+  hosts       Manage hosts file
+    add         Add entry to hosts file
+    remove      Remove entry from hosts file
+    sync        Sync all sites to hosts
+    list        List DevFlow entries
+
+  migrate     Migrate projects from Windows to WSL
+    <source>    Migrate project to WSL filesystem
+    scan        Scan for projects to migrate
+
+SYSTEM COMMANDS:
+  doctor      Run system health checks
   update      Update DevFlow to latest version
 
 Global Options:
-  --help, -h     Show help information
-  --version, -v  Show version information
-  --verbose      Enable verbose output
-  --quiet        Suppress non-error output
-  --debug        Enable debug mode
+  --help, -h       Show this help message
+  --version, -v    Show version information
+  --verbose        Enable verbose output
+  --quiet          Suppress non-error output
+  --debug          Enable debug mode with set -x
 
-Examples:
+Quick Start:
+  # 1. Create a site
   devflow site create myapp.test php8.2
-  devflow php install 8.3
+
+  # 2. Add to hosts file
+  devflow hosts add myapp.test
+
+  # 3. Create SSL certificate (optional)
+  devflow ssl install-ca
   devflow ssl create myapp.test
+
+  # 4. Create database (optional)
   devflow db create myapp_db
 
-Run 'devflow <command> --help' for command-specific help.
+  # 5. Open in browser
+  devflow site open myapp.test
 
-Documentation: https://devflow.dev/docs
-Report issues: https://github.com/devflow/devflow/issues
+Examples:
+  devflow site create api.test php8.3 public
+  devflow php install 8.3
+  devflow db import myapp_db backup.sql
+  devflow backup all myapp.test
+  devflow service status
+  devflow doctor
+
+Get Help:
+  devflow <command> --help      Show command-specific help
+  devflow site --help            Show site command help
+  devflow doctor                 Check system health
+
+Repository: https://github.com/kunwar-shah/dev-flow
+Issues:     https://github.com/kunwar-shah/dev-flow/issues
+
 EOF
 }
 
