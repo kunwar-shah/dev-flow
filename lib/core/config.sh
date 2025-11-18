@@ -17,7 +17,10 @@ DEVFLOW_SITES_FILE="$DEVFLOW_CONFIG_DIR/sites.json"
 DEVFLOW_CONFIG_FILE="$DEVFLOW_CONFIG_DIR/config.json"
 DEVFLOW_DB_CREDS_FILE="$DEVFLOW_CONFIG_DIR/db-credentials.json"
 
-# Default configuration values
+# Configuration template path
+DEVFLOW_CONFIG_TEMPLATE="${DEVFLOW_LIB_DIR}/../config/devflow.conf.json"
+
+# Default configuration values (fallback if template not found)
 DEFAULT_WEBSITES_ROOT="$HOME/websites"
 DEFAULT_PHP_VERSION="8.2"
 DEFAULT_DOCROOT="public"
@@ -66,16 +69,39 @@ config_init() {
 }
 
 #######################################
-# Create default configuration file
+# Create default configuration file from template
+# Reads config/devflow.conf.json and expands variables
 # Globals:
 #   DEVFLOW_CONFIG_FILE
-#   DEFAULT_*
+#   DEVFLOW_CONFIG_TEMPLATE
+#   DEVFLOW_CONFIG_DIR
+#   DEVFLOW_LIB_DIR
+#   HOME
+#   USER
 # Returns:
 #   0 on success, 1 on error
 #######################################
 config_create_default() {
     local config
-    config=$(cat <<EOF
+
+    # Check if template exists
+    if [ -f "$DEVFLOW_CONFIG_TEMPLATE" ]; then
+        # Read template and expand variables
+        config=$(cat "$DEVFLOW_CONFIG_TEMPLATE")
+
+        # Expand common variables
+        config="${config//\$HOME/$HOME}"
+        config="${config//\$USER/$USER}"
+        config="${config//\$DEVFLOW_CONFIG_DIR/$DEVFLOW_CONFIG_DIR}"
+        config="${config//\$DEVFLOW_LIB_DIR/$DEVFLOW_LIB_DIR}"
+
+        # Add runtime fields
+        config=$(echo "$config" | jq --arg date "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" '. + {updated_at: $date}')
+        config=$(echo "$config" | jq '.php.installed_versions = []')
+
+    else
+        # Fallback to hardcoded config if template not found
+        config=$(cat <<EOF
 {
   "version": "1.0",
   "updated_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
@@ -133,7 +159,9 @@ config_create_default() {
 }
 EOF
 )
+    fi
 
+    # Write config file
     echo "$config" > "$DEVFLOW_CONFIG_FILE" || return 1
     return 0
 }
