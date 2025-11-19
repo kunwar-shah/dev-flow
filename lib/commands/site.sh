@@ -286,9 +286,19 @@ create_vhost() {
 # Returns:
 #   0 on success
 #######################################
-site_list() {
+site_list_command() {
+    # Get sites from registry using config.sh's site_list function
+    # We need to call it explicitly to avoid recursion
     local sites
-    sites=$(site_list .sites[])
+    if [ ! -f "$DEVFLOW_SITES_FILE" ]; then
+        print_info "No sites found"
+        echo ""
+        echo "Create a site with:"
+        echo "  devflow site create myapp.test php8.2"
+        return 0
+    fi
+
+    sites=$(jq -c '.sites[]' "$DEVFLOW_SITES_FILE" 2>/dev/null || echo "")
 
     # Check if there are any sites
     local count
@@ -594,7 +604,7 @@ site_command() {
             site_create "$@"
             ;;
         list|ls)
-            site_list "$@"
+            site_list_command "$@"
             ;;
         delete|rm|remove)
             site_delete "$@"
