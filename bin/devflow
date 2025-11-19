@@ -138,6 +138,7 @@ UTILITY COMMANDS:
     scan        Scan for projects to migrate
 
 SYSTEM COMMANDS:
+  quickstart  One-shot setup (install everything + demo)
   doctor      Run system health checks
   update      Update DevFlow to latest version
 
@@ -307,6 +308,11 @@ route_command() {
             # shellcheck source=lib/commands/update.sh
             source "$LIB_DIR/commands/update.sh"
             update_command "$@"
+            ;;
+        quickstart|setup)
+            # shellcheck source=lib/commands/quickstart.sh
+            source "$LIB_DIR/commands/quickstart.sh"
+            quickstart_command "$@"
             ;;
         help)
             show_help
